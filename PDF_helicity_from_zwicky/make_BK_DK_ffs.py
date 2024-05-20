@@ -11,7 +11,7 @@ import gvar as gv
 
 ############################################# Read numbers and correlations from text file ###########################
 
-f = open('BtoKandDtoKformfacs.txt','r')
+f = open('PDF_helicity_from_zwicky/BtoKandDtoKformfacs.txt','r')
 lines = f.readlines()
 toggle = False
 for line in lines:

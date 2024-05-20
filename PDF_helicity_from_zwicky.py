@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import make_BK_DK_ffs as ff
+import PDF_helicity_from_zwicky.make_BK_DK_ffs as ff
 import os
 import shutil
 import PDF_helicity_from_zwicky.PDF_formulation as PDF

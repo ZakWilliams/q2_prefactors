@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import make_BK_DK_ffs as ff
+import PDF_helicities_expanded.make_BK_DK_ffs as ff
 import os
 
 import mplhep as hep
