@@ -382,7 +382,7 @@ plt.axvspan(4580, q[-1], zorder=0, color='gray', alpha=0.4, lw=0.)
 plt.xlabel(r'$m_{\mu\mu}$ [MeV]', loc='center')
 plt.ylabel(r'$\Delta J = 0$ Prefactor Ratios', loc='center')
 plt.legend(loc = (0.22, 0.68))
-plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/all_ratios.pdf')
+plt.savefig(f'PDF_helicities_expanded/plots/DeltaJ_eq_0_q2_ratios.pdf')
 plt.close()
 
 '''
