@@ -24,8 +24,8 @@ plt.rcParams.update({
 
 C_S_mag = 0
 C_P_mag = 0
-C_9_mag = 4.270
-C_10_mag = -4.110
+C_9_mag = 4.27
+C_10_mag = -4.11
 C_T_mag = 0
 C_T5_mag = 0
 C_7_mag = -0.304
@@ -72,7 +72,8 @@ c_H = -(4*GF/np.sqrt(2)) * (fine_struc_const/(4*np.pi)) * V_ts * V_tb
 if not os.path.exists('PDF_helicities_expanded/plots'):
     os.makedirs('PDF_helicities_expanded/plots')
 
-q = np.linspace(2 * mmu, mB - mK, 1000)
+offset = 0.00000001
+q = np.linspace(2 * mmu + offset, mB - mK - offset, 1000)
 q2 = q**2
 ctl = np.linspace(-np.pi, np.pi, 1000)
 
@@ -179,10 +180,10 @@ f_T_eff = np.sqrt(fp_efficiency(q2) if efficiencies_on else 1)
 # hXCY - term in h^X before C_Y
 hSCS = ((mB2 - mK2)/2) * (1/(mb - ms)) * ff_0 * f_0_eff
 hPCP = ((mB2 - mK2)/2) * (1/(mb - ms)) * ff_0 * f_0_eff
-hPC10 = ((mB2 - mK2)/2) * ((2*mmu)/q2) * ff_0 * f_0_eff
-hVCV = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ff_p * f_p_eff
-hVC7 = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ((2*mb)/(mB + mK)) * ff_T * f_T_eff
-hAC10 = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ff_p * f_p_eff
+hPC10 = ((mB2 - mK2)/2) * ((2*mmu)/q2) * ff_0 * f_0_eff # CHECK
+hVCV = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ff_p * f_p_eff # CHECK
+hVC7 = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ((2*mb)/(mB + mK)) * ff_T * f_T_eff # CHECK
+hAC10 = (np.sqrt(kallen_BK)/(2*np.sqrt(q2))) * ff_p * f_p_eff # CHECK
 hTtCT = -1j * ( np.sqrt(kallen_BK)/ (2*(mB+mK))) * ff_T
 hTCT5 = -1j * ( np.sqrt(kallen_BK)/ (np.sqrt(2)*(mB+mK))) * ff_T
 
@@ -327,33 +328,119 @@ plt.close()
 if not os.path.exists('PDF_helicities_expanded/plots/prefactors/D_separated/ratios'):
     os.makedirs('PDF_helicities_expanded/plots/prefactors/D_separated/ratios')
 
-q_CS_over_CP_ratio = []
-q_C9_over_C10_ratio = []
 CS_over_CP_ratio = []
 C9_over_C10_ratio = []
+CT5_over_CT_ratio = []
+C9_over_C10_D2_ratio = []
+CT5_over_CT_D2_ratio = []
 
-for i, j, q_ in zip(CSCS_D0_prefactor, CPCP_D0_prefactor, q):
+for i, j in zip(CSCS_D0_prefactor, CPCP_D0_prefactor):
     if j != 0:
         CS_over_CP_ratio.append(i/j)
-        q_CS_over_CP_ratio.append(q_)
-plt.plot(q_CS_over_CP_ratio, CS_over_CP_ratio, lw=1.5)
+    else:
+        CS_over_CP_ratio.append(None)
+plt.plot(q, CS_over_CP_ratio, lw=1.5)
 plt.xlabel(r'$m_{\mu\mu}$ (MeV)')
 plt.ylabel(r'$\frac{\mathbb{A}^0_{S,S}(q^2)}{\mathbb{A}^0_{P,P}(q^2)}$')
 plt.axhline(y=1,linestyle='dashed',color='grey',zorder=0,lw=1.5)
 plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/CS2_prefactor_over_CP2_prefactor.pdf')
 plt.close()
 
-for i, j, q_ in zip(C9C9_D0_prefactor, C10C10_D0_prefactor, q):
+for i, j in zip(C9C9_D0_prefactor, C10C10_D0_prefactor):
     if j != 0:
         C9_over_C10_ratio.append(i/j)
-        q_C9_over_C10_ratio.append(q_)
-plt.plot(q_C9_over_C10_ratio, C9_over_C10_ratio, lw=1.5)
+    else:
+        C9_over_C10_ratio.append(None)
+plt.plot(q, C9_over_C10_ratio, lw=1.5)
 plt.xlabel(r'$m_{\mu\mu}$ (MeV)')
 plt.ylabel(r'$\frac{\mathbb{A}^0_{V,V}(q^2)}{\mathbb{A}^D_{A,A}(q^2)}$')
 plt.axhline(y=1,linestyle='dashed',color='grey',zorder=0,lw=1.5)
 plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/C92_prefactor_over_C102_prefactor.pdf')
 plt.close()
 
+for i, j in zip(CT5CT5_D0_prefactor, CTCT_D0_prefactor):
+    if j != 0:
+        CT5_over_CT_ratio.append(i/j)
+    else:
+        CT5_over_CT_ratio.append(None)
+plt.plot(q, CT5_over_CT_ratio, lw=1.5)
+plt.xlabel(r'$m_{\mu\mu}$ (MeV)')
+plt.ylabel(r'$\frac{\mathbb{A}^0_{T,T}(q^2)}{\mathbb{A}^D_{T5,T5}(q^2)}$')
+plt.axhline(y=1,linestyle='dashed',color='grey',zorder=0,lw=1.5)
+plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/CT2_prefactor_over_CT52_prefactor.pdf')
+plt.close()
+
+
+
+plt.plot(q, CS_over_CP_ratio, label=r'$R_{q^2}(S,P)$', lw=2, color='blue') # blue label=r'$\frac{F_{SS}^{D=0}(q^2)}{F_{PP}^{D=0}(q^2)}$'
+plt.plot(q, C9_over_C10_ratio, label=r'$R_{q^2}(9,10)$', lw=2, color='red') # red
+plt.plot(q, CT5_over_CT_ratio, label=r'$R_{q^2}(T5,T)$', lw=2, color='green') # green
+plt.ylim(0, 2)
+plt.xlim(0, 5000)
+plt.axvspan(q[0], 990, zorder=0, color='gray', alpha=0.4, lw=0., label=r'First and Last bins in $B_s^0\to\phi\mu\mu.^4$')
+plt.axvspan(4580, q[-1], zorder=0, color='gray', alpha=0.4, lw=0.)
+plt.xlabel(r'$m_{\mu\mu}$ [MeV]', loc='center')
+plt.ylabel(r'$\Delta J = 0$ Prefactor Ratios', loc='center')
+plt.legend(loc = (0.22, 0.68))
+plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/all_ratios.pdf')
+plt.close()
+
+'''
+bin_lower = [q[0]/1000, np.sqrt(1.1), np.sqrt(2.5), np.sqrt(4.0), np.sqrt(6.0), np.sqrt(8.0), np.sqrt(11.0), np.sqrt(15.0), np.sqrt(17.0), np.sqrt(19.0), 4.580] 
+bin_upper = [0.990, np.sqrt(2.5), np.sqrt(4.0), np.sqrt(6.0), np.sqrt(8.0), np.sqrt(11.0), np.sqrt(12.5), np.sqrt(17.0), np.sqrt(19.0), np.sqrt(21.0), q[-1]/1000]
+bin_lower = [bin_lower_ * 1000 for bin_lower_ in bin_lower]
+bin_upper = [bin_upper_ * 1000 for bin_upper_ in bin_upper]
+bin_midpoints = [(lower+upper)/2 for lower, upper in zip(bin_lower, bin_upper)]
+SP_ratios = []
+VA_ratios = []
+T5T_ratios = []
+for lower, upper, midpoint in zip(bin_lower, bin_upper, bin_midpoints):
+    print(f"{lower:.1f}", f"{upper:.1f}", f"{midpoint:.1f}")
+    total_SP = 0
+    total_VA = 0
+    total_T5T = 0
+    points_count = 0
+    for q_, SP, VA, T5T in zip(q, CS_over_CP_ratio, C9_over_C10_ratio, CT5_over_CT_ratio):
+        if q_ >= lower and q_ < upper:
+            total_SP += SP
+            total_VA += VA
+            total_T5T += T5T
+            points_count += 1
+
+    SP_ratios.append(total_SP/points_count)
+    VA_ratios.append(total_VA/points_count)
+    T5T_ratios.append(total_T5T/points_count)
+
+plt.hlines(SP_ratios, bin_lower, bin_upper)
+plt.scatter(bin_midpoints, SP_ratios, label=r'$R_{q^2}(S,P)$', lw=2, color='blue') # blue label=r'$\frac{F_{SS}^{D=0}(q^2)}{F_{PP}^{D=0}(q^2)}$'
+plt.scatter(bin_midpoints, VA_ratios, label=r'$R_{q^2}(9,10)$', lw=2, color='red') # red
+plt.scatter(bin_midpoints, T5T_ratios, label=r'$R_{q^2}(T5,T)$', lw=2, color='green') # green
+plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/all_ratio_scatters.pdf')
+'''
+
+
+'''
+# D = 2 ratios
+for i, j in zip(C9C9_D2_prefactor, C10C10_D2_prefactor):
+    if j != 0:
+        C9_over_C10_D2_ratio.append(i/j)
+    else:
+        C9_over_C10_D2_ratio.append(None)
+
+for i, j in zip(CT5CT5_D2_prefactor, CTCT_D2_prefactor):
+    if j != 0:
+        CT5_over_CT_D2_ratio.append(i/j)
+    else:
+        CT5_over_CT_D2_ratio.append(None)
+
+plt.plot(q, C9_over_C10_D2_ratio, label=r'$9/10$', lw=2, color='red') # red
+plt.plot(q, CT5_over_CT_D2_ratio, label=r'$T5/T$', lw=2, color='green') # green
+plt.ylim(0, 2)
+plt.legend()
+plt.savefig(f'PDF_helicities_expanded/plots/prefactors/D_separated/ratios/all_D2.pdf')
+plt.close()
+'''
+"""
 #################################################################################################################################################
 #################################################################################################################################################
 # PLOT WHOLE PDF
@@ -401,19 +488,46 @@ def formulate_PDF(C_7, C_S, C_P, C_9, C_10, C_T, C_T5):
 #################################################################################################################################################
 
 original_PDF = formulate_PDF(C_7=C_7, C_S=C_S, C_P=C_P, C_9=C_9, C_10=C_10, C_T=C_T, C_T5=C_T5)[0]
-proposed_PDF_CP = formulate_PDF(C_7=C_7, C_S=C_S, C_P=C_P-0.5, C_9=C_9, C_10=C_10, C_T=C_T, C_T5=C_T5)[0]
-proposed_PDF_CV = formulate_PDF(C_7=C_7, C_S=C_S, C_P=C_P, C_9=C_9-0.5, C_10=C_10, C_T=C_T, C_T5=C_T5)[0]
-proposed_PDF_CS = formulate_PDF(C_7=C_7, C_S=C_S-0.5, C_P=C_P, C_9=C_9, C_10=C_10, C_T=C_T, C_T5=C_T5)[0]
-proposed_PDF_CA = formulate_PDF(C_7=C_7, C_S=C_S, C_P=C_P, C_9=C_9, C_10=C_10-0.5, C_T=C_T, C_T5=C_T5)[0]
+proposed_PDF = formulate_PDF(C_7=C_7,
+                             C_S=-0.468*(np.cos(-1.4314*(180/np.pi))+1j*np.sin(-1.4314*(180/np.pi))),
+                             C_P=-0.5704*(np.cos(0.*(180/np.pi))+1j*np.sin(0.*(180/np.pi))),
+                             C_9=4.0078*(np.cos(0.0102*(180/np.pi))+1j*np.sin(0.0102*(180/np.pi))),
+                             C_10=-4.33,
+                             C_T=C_T,
+                             C_T5=C_T5)[0]
+proposed_PDF_max = formulate_PDF(C_7=C_7,
+                             C_S=-0.468*(np.cos(-1.4314*(180/np.pi))+1j*np.sin(-1.4314*(180/np.pi))),
+                             C_P=(-0.5704-0.1063)*(np.cos(0.*(180/np.pi))+1j*np.sin(0.*(180/np.pi))),
+                             C_9=4.0078*(np.cos(0.0102*(180/np.pi))+1j*np.sin(0.0102*(180/np.pi))),
+                             C_10=-4.33,
+                             C_T=C_T,
+                             C_T5=C_T5)[0]
+proposed_PDF_min = formulate_PDF(C_7=C_7,
+                             C_S=-0.468*(np.cos(-1.4314*(180/np.pi))+1j*np.sin(-1.4314*(180/np.pi))),
+                             C_P=(-0.5704+0.1063)*(np.cos(0.*(180/np.pi))+1j*np.sin(0.*(180/np.pi))),
+                             C_9=4.0078*(np.cos(0.0102*(180/np.pi))+1j*np.sin(0.0102*(180/np.pi))),
+                             C_10=-4.33,
+                             C_T=C_T,
+                             C_T5=C_T5)[0]
 
-
-plt.plot(q, original_PDF, lw=1.5, label=r'SM $C_X$ set')
-plt.plot(q, proposed_PDF_CP, lw=1.5, label=r'$C_P \rightarrow C_P - 0.5$')
-plt.plot(q, proposed_PDF_CV, lw=1.5, label=r'$C_9 \rightarrow C_9 - 0.5$')
-plt.plot(q, proposed_PDF_CS, lw=1.5, label=r'$C_9 \rightarrow C_S - 0.5$')
-plt.plot(q, proposed_PDF_CA, lw=1.5, label=r'$C_{10} \rightarrow C_{10} - 0.5$')
+plt.plot(q, original_PDF, lw=1.5, label=r'$\frac{d\Gamma}{dm_{\mu\mu}}({C_X:SM})$', color='gray')
+plt.plot(q, proposed_PDF, lw=1.5, label=r'$\frac{d\Gamma}{dm_{\mu\mu}}({C_X:fitted})$')
+plt.fill_between(q,proposed_PDF_min, proposed_PDF_max, zorder=0, alpha=0.3, label=r'$C_{P-fitted}\pm ERR(C_P)$')
+plt.ylabel(r'$\frac{d\Gamma}{dm_{\mu\mu}}$')
+plt.xlabel(r'$m_{\mu\mu}$ (MeV)')
 
 plt.legend()
-plt.savefig('PDF_helicities_expanded/plots/COMPARISON.pdf')
-plt.show()
+plt.savefig('PDF_helicities_expanded/plots/PDF_comparison.pdf')
+plt.close()
 
+#calculating residuals
+proposed_larger = proposed_PDF >= original_PDF
+residuals = np.zeros(len(q))
+for i in range(len(residuals)):
+    denominator = proposed_PDF-proposed_PDF_min if residuals[i] else proposed_PDF_max-proposed_PDF
+    residuals = (proposed_PDF-original_PDF)/denominator
+plt.plot(q, residuals)
+plt.ylabel(r'$\left(\frac{d\Gamma}{dm_{\mu\mu}}\right)_{norm.res.}$')
+plt.xlabel(r'$m_{\mu\mu}$ (MeV)')
+plt.savefig('PDF_helicities_expanded/plots/PDF_residuals.pdf')
+"""
