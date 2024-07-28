@@ -5,6 +5,8 @@ import PDF_helicities_expanded.make_BK_DK_ffs as ff
 
 import mplhep as hep
 
+from BKG_constants import mmu, mmu2, mB, mB2, mK, mK2, mpi, mpi2, hbar_in_MeV, B_lifetime
+
 hep.style.use("LHCb2")
 
 plt.rcParams.update({
@@ -15,7 +17,6 @@ plt.rcParams.update({
     'text.latex.preamble': r'\usepackage{amsfonts}\usepackage{color}'
 })
 
-
 binned_data_sentinel = object()
 unbinned_data_sentinel = object()
 
@@ -24,9 +25,8 @@ def plot_backgrounds_along_m_Kmumu(
         CMB,
         SIG,
         MIS,
-        data = None,
-        binned_data = ,
-        unbinned_data = ,
+        binned_data = binned_data_sentinel,
+        unbinned_data = unbinned_data_sentinel,
         folder_name = 'plots',
         file_name = 'backgrounds_along_m_Kmumu',
         highlight_regions = True,
@@ -94,14 +94,11 @@ def plot_backgrounds_along_m_Kmumu(
     ax1.set_xlim(xlims[0], xlims[1])
     ax1.set_ylim(ylims[0], ylims[1])
 
-    #ax1.set_yticklabels([])
 
-    #fig.savefig(f'{folder_name}/{file_name}.pdf')
-    #plt.close()
 
-    if data is not None:
-        if Qdata is not None:
-            ax1.scatter(Qdata, data)
+
+
+
 
     if plot_frac_underneath:
         # plot frac of combinatorial background below
