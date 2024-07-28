@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import PDF_helicities_expanded.make_BK_DK_ffs as ff
-#from termcolor import colored
+from termcolor import colored
 
 import mplhep as hep
 
@@ -94,10 +94,12 @@ def plot_backgrounds_along_m_Kmumu(
     ax1.set_xlim(xlims[0], xlims[1])
     ax1.set_ylim(ylims[0], ylims[1])
 
-
-
-
-
+    if (binned_data is not binned_data_sentinel) and (unbinned_data is not unbinned_data_sentinel):
+        raise Exception(colored("Your call of plot_backgrounds_along_m_Kmumu is attempting to load both binned and unbinned data for plotting. Please pass only one data set.", "red"))
+    elif binned_data is not binned_data_sentinel:
+        print("DUMMY")
+    elif unbinned_data is not unbinned_data_sentinel:
+        print("DUMMY")
 
 
     if plot_frac_underneath:

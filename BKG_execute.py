@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import PDF_helicities_expanded.make_BK_DK_ffs as ff
-#from termcolor import colored
 
 from BKG_plotter import plot_backgrounds_along_m_Kmumu
 
@@ -114,8 +113,8 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                CMB=CMB,
                                SIG=SIG,
                                MIS=MIS,
-                               #binned_data = [binned_Q, binned_freq],
-                               #unbinned_data = [interleved x, y],
+                               binned_data = [binned_Q, binned_freq],
+                               #unbinned_data = 2,
                                folder_name=folder,
                                fill_or_lines='lines',
                                plot_total_line_above_fill=True,
