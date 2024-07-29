@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import PDF_helicities_expanded.make_BK_DK_ffs as ff
+import scipy.interpolate
 
 from BKG_plotter import plot_backgrounds_along_m_Kmumu
 
@@ -98,22 +99,38 @@ MIS = double_crystal_ball(Q,
 MIS /= np.max(MIS)
 MIS *= 0.6*10E2
 
+spread = 10
 
+TOT = MIS + CMB + SIG
+# Normalize TOT
+TOT_area = np.trapz(TOT, Q)
+TOT /= TOT_area
+
+# Generate bin boundaries and midpoints
+bin_boundaries = np.linspace(Q[0], Q[-1], 11)
+bin_midpoints = (bin_boundaries[:-1] + bin_boundaries[1:]) / 2
+
+# Interpolate TOT over the bin midpoints
+biased_bin_data_gen = scipy.interpolate.interp1d(Q, TOT)
+binned_freq = np.array(biased_bin_data_gen(bin_midpoints))
+
+# Add random noise to each binned frequency
+for i in range(len(binned_freq)):
+    binned_freq[i] += np.random.normal(0, spread*np.sqrt(binned_freq[i]/TOT_area))
+
+# Calculate binned errors
+binned_errs_top = [spread*np.sqrt(binned_freq[i]/TOT_area) for i in range(len(binned_freq))]
+binned_errs_bot = [spread*np.sqrt(binned_freq[i]/TOT_area) for i in range(len(binned_freq))]
 
 
 folder = 'PDF_helicities_expanded/plots'
-
-binned_Q = np.linspace(5200, 5800, 10)
-binned_freq = np.linspace(10E-5,10E-3,len(binned_Q))
-
-
 # make so can take binned data or unbinned data
 
 plot_backgrounds_along_m_Kmumu(Q=Q,
                                CMB=CMB,
                                SIG=SIG,
                                MIS=MIS,
-                               binned_data = [binned_Q, binned_freq],
+                               binned_data = [bin_boundaries, binned_freq, binned_errs_top, binned_errs_bot],
                                #unbinned_data = 2,
                                folder_name=folder,
                                fill_or_lines='lines',

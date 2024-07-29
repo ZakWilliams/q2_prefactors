@@ -18,6 +18,7 @@ plt.rcParams.update({
 })
 
 binned_data_sentinel = object()
+bin_count_sentinel = object()
 unbinned_data_sentinel = object()
 
 def plot_backgrounds_along_m_Kmumu(
@@ -27,6 +28,7 @@ def plot_backgrounds_along_m_Kmumu(
         MIS,
         binned_data = binned_data_sentinel,
         unbinned_data = unbinned_data_sentinel,
+        bin_count = bin_count_sentinel,
         folder_name = 'plots',
         file_name = 'backgrounds_along_m_Kmumu',
         highlight_regions = True,
@@ -55,10 +57,10 @@ def plot_backgrounds_along_m_Kmumu(
     edges = [5540, 5620, 5700, 5780]
 
     #fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
-    fig = plt.figure(figsize=(12, 12))
-    ax1 = fig.add_axes([0.1, 0.3, 0.8, 0.6])
+    fig = plt.figure(figsize=(18, 12))
+    ax1 = fig.add_axes([0.1/1.5, 0.3, 0.8/1.5, 0.6])
     if plot_frac_underneath:
-        ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.2])
+        ax2 = fig.add_axes([0.1/1.5, 0.1, 0.8/1.5, 0.2])
         #ax2.sharex(ax1)
 
     # do the drawing of the data:
@@ -86,7 +88,6 @@ def plot_backgrounds_along_m_Kmumu(
             ax1.axvline(edge, zorder=0, lw = 0.3, color='blue')
     if show_mB:
         ax1.axvline(mB, zorder=0, lw = 1, color='red')
-    ax1.legend()
     if not plot_frac_underneath: ax1.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
     if plot_frac_underneath: ax1.set_xticklabels([])
     ax1.set_ylabel(r'$\frac{1}{\Gamma}\frac{d\Gamma}{dm_{K\mu\mu}}$', loc='center')
@@ -97,13 +98,45 @@ def plot_backgrounds_along_m_Kmumu(
     if (binned_data is not binned_data_sentinel) and (unbinned_data is not unbinned_data_sentinel):
         raise Exception(colored("Your call of plot_backgrounds_along_m_Kmumu is attempting to load both binned and unbinned data for plotting. Please pass only one data set.", "red"))
     elif binned_data is not binned_data_sentinel:
-        print("DUMMY")
+        # calculate bin centres and bin widths from binned_data[0]
+        bin_lower = binned_data[0][:-1]
+        bin_upper = binned_data[0][1:]
+
+        Q_bin_centres = (bin_lower + bin_upper) / 2
+        Q_bin_widths = (bin_upper - bin_lower) / 2
+
+        plotting_data = [Q_bin_centres, Q_bin_widths, binned_data[1], binned_data[2], binned_data[3]]
     elif unbinned_data is not unbinned_data_sentinel:
-        print("DUMMY")
+        if bin_count is not bin_count_sentinel:
+            raise Exception(colored("You are loading unbinned data into plot_backgrounfs_along_m_Kmumu. Please specify a number for bin_count.", "red"))
+        raise Exception(colored("UNBINNED DATA UNIMPLEMENTED","red"))
+        # package data into bins and generate errors
 
 
+    # plot the now binned data
+    if (binned_data is not binned_data_sentinel) or (unbinned_data is not unbinned_data_sentinel):
+        #ax1.errorbar(plotting_data[0], plotting_data[2], plotting_data[3], plotting_data[1], color='black', elinewidth=1, capsize=0, capthick=2)
+        # some options for more convenient customising
+        cap_length = 0.2
+        eline_width = 1
+        ecolor = 'black'
+        for bin_centre, bin_width, y, y_err_pos, y_err_neg in zip(plotting_data[0], plotting_data[1], plotting_data[2], plotting_data[3], plotting_data[4]):
+            # mark out the error line
+            ax1.vlines(bin_centre, max(0, y - y_err_neg), y + y_err_pos, lw=eline_width, color=ecolor)
+            # mark out the bin width
+            ax1.hlines(y, bin_centre - bin_width, bin_centre + bin_width, lw=eline_width, color=ecolor)
+            # cap the vertical error line
+            ax1.hlines(y + y_err_pos, bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
+            ax1.hlines(max(0, y - y_err_pos), bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
+
+
+    # custom legend entry how?
+    ax1.legend(loc=(1.02, 0.58))
+
+
+
+    # plot the fraction of the combinatorial background according to the models.
     if plot_frac_underneath:
-        # plot frac of combinatorial background below
         CMB_frac = CMB/TOTAL
         MIS_frac = MIS/TOTAL
         SIG_frac = SIG/TOTAL
@@ -114,7 +147,7 @@ def plot_backgrounds_along_m_Kmumu(
         ax2.set_xlim(xlims[0], xlims[1])
         ax2.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
         ax2.set_ylabel(r'Fraction', loc='center')
-        #plt.savefig(f'{folder_name}/TEMPORARY_frac_plot.pdf')
+
 
     fig.savefig(f'{folder_name}/{file_name}.pdf')
     plt.close(fig)
