@@ -102,9 +102,6 @@ MIS *= 0.6*10E2
 spread = 10
 
 TOT = MIS + CMB + SIG
-# Normalize TOT
-TOT_area = np.trapz(TOT, Q)
-TOT /= TOT_area
 
 # Generate bin boundaries and midpoints
 bin_boundaries = np.linspace(Q[0], Q[-1], 11)
@@ -116,15 +113,42 @@ binned_freq = np.array(biased_bin_data_gen(bin_midpoints))
 
 # Add random noise to each binned frequency
 for i in range(len(binned_freq)):
-    binned_freq[i] += np.random.normal(0, spread*np.sqrt(binned_freq[i]/TOT_area))
+    binned_freq[i] = max(0,binned_freq[i] + np.random.normal(0, spread*np.sqrt(binned_freq[i])))
 
+damp = 10
 # Calculate binned errors
-binned_errs_top = [spread*np.sqrt(binned_freq[i]/TOT_area) for i in range(len(binned_freq))]
-binned_errs_bot = [spread*np.sqrt(binned_freq[i]/TOT_area) for i in range(len(binned_freq))]
+binned_errs_top = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binned_freq))]
+binned_errs_bot = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binned_freq))]
+
+# next:
+# - move away from normalization space. This makes things unhelpful and counterintuitive
+# - make the optionality for 1, 2, or none of the below windows work correctly with all the axes and such
+# - implement unbinned data generator
+# - implement data binner, incuding error estimation
+
+
+
+
+
+
+
+
+
+
+
 
 
 folder = 'PDF_helicities_expanded/plots'
 # make so can take binned data or unbinned data
+
+
+
+
+
+
+
+
+
 
 plot_backgrounds_along_m_Kmumu(Q=Q,
                                CMB=CMB,
@@ -138,7 +162,7 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                logarithmic=True,
                                alpha=0.4,
                                xlims=[Q[0], Q[-1]],
-                               normalise=True,
-                               ylims=[0.000001, 0.1],
+                               ylims=[1+0.000001, 1000000],
                                plot_frac_underneath=True,
+                               plot_disagreement_underneath=True,
                                )

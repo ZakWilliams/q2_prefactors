@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import PDF_helicities_expanded.make_BK_DK_ffs as ff
 from termcolor import colored
+import scipy.interpolate
 
 import mplhep as hep
 
@@ -38,30 +39,31 @@ def plot_backgrounds_along_m_Kmumu(
         alpha=0.2,
         fill_or_lines = 'lines',
         plot_total_line_above_fill = False,
-        normalise=True,
         logarithmic = True,
         ylims = [None, None],
         xlims = [mB-100, mB+600],
         plot_frac_underneath = False,
+        plot_disagreement_underneath = False,
     ):
 
     TOTAL = CMB + SIG + MIS
     area = np.trapz(TOTAL, Q)
     #print(area)
-    if normalise:
-        CMB /= area
-        SIG /= area
-        MIS /= area
     TOTAL = CMB + SIG + MIS
     centres = [5500, 5580, 5660, 5740, 5820]
     edges = [5540, 5620, 5700, 5780]
 
-    #fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
-    fig = plt.figure(figsize=(18, 12))
-    ax1 = fig.add_axes([0.1/1.5, 0.3, 0.8/1.5, 0.6])
+    #fig, (ax1, ax3) = plt.subplots(nrows=2, sharex=True)
+    fig = plt.figure(figsize=(18, 14.4))
+    ax1 = fig.add_axes([0.1/1.5, 0.5/1.2, 0.8/1.5, 0.6/1.2])
+    if plot_disagreement_underneath:
+        ax2 = fig.add_axes([0.1/1.5, 0.3/1.2, 0.8/1.5, 0.2/1.2])
     if plot_frac_underneath:
-        ax2 = fig.add_axes([0.1/1.5, 0.1, 0.8/1.5, 0.2])
-        #ax2.sharex(ax1)
+        ax3 = fig.add_axes([0.1/1.5, 0.1/1.2, 0.8/1.5, 0.2/1.2])
+        #ax3.sharex(ax1)
+        
+
+    
 
     # do the drawing of the data:
     if fill_or_lines == 'lines':
@@ -90,11 +92,12 @@ def plot_backgrounds_along_m_Kmumu(
         ax1.axvline(mB, zorder=0, lw = 1, color='red')
     if not plot_frac_underneath: ax1.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
     if plot_frac_underneath: ax1.set_xticklabels([])
-    ax1.set_ylabel(r'$\frac{1}{\Gamma}\frac{d\Gamma}{dm_{K\mu\mu}}$', loc='center')
+    ax1.set_ylabel(r'Events', loc='center')
     if logarithmic: ax1.set_yscale("log")
     ax1.set_xlim(xlims[0], xlims[1])
     ax1.set_ylim(ylims[0], ylims[1])
 
+    plotting_data=None
     if (binned_data is not binned_data_sentinel) and (unbinned_data is not unbinned_data_sentinel):
         raise Exception(colored("Your call of plot_backgrounds_along_m_Kmumu is attempting to load both binned and unbinned data for plotting. Please pass only one data set.", "red"))
     elif binned_data is not binned_data_sentinel:
@@ -114,25 +117,54 @@ def plot_backgrounds_along_m_Kmumu(
 
 
     # plot the now binned data
-    if (binned_data is not binned_data_sentinel) or (unbinned_data is not unbinned_data_sentinel):
-        #ax1.errorbar(plotting_data[0], plotting_data[2], plotting_data[3], plotting_data[1], color='black', elinewidth=1, capsize=0, capthick=2)
-        # some options for more convenient customising
-        cap_length = 0.2
-        eline_width = 1
-        ecolor = 'black'
-        for bin_centre, bin_width, y, y_err_pos, y_err_neg in zip(plotting_data[0], plotting_data[1], plotting_data[2], plotting_data[3], plotting_data[4]):
-            # mark out the error line
-            ax1.vlines(bin_centre, max(0, y - y_err_neg), y + y_err_pos, lw=eline_width, color=ecolor)
-            # mark out the bin width
-            ax1.hlines(y, bin_centre - bin_width, bin_centre + bin_width, lw=eline_width, color=ecolor)
-            # cap the vertical error line
-            ax1.hlines(y + y_err_pos, bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
-            ax1.hlines(max(0, y - y_err_pos), bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
+    if plotting_data is not None:
+        if (binned_data is not binned_data_sentinel) or (unbinned_data is not unbinned_data_sentinel):
+            #ax1.errorbar(plotting_data[0], plotting_data[2], plotting_data[3], plotting_data[1], color='black', elinewidth=1, capsize=0, capthick=2)
+            # some options for more convenient customising
+            cap_length = 0.2
+            eline_width = 1
+            ecolor = 'black'
+            for bin_centre, bin_width, y, y_err_pos, y_err_neg in zip(plotting_data[0], plotting_data[1], plotting_data[2], plotting_data[3], plotting_data[4]):
+                # mark out the error line
+                ax1.vlines(bin_centre, max(0, y - y_err_neg), y + y_err_pos, lw=eline_width, color=ecolor)
+                # mark out the bin width
+                ax1.hlines(y, bin_centre - bin_width, bin_centre + bin_width, lw=eline_width, color=ecolor)
+                # cap the vertical error line
+                ax1.hlines(y + y_err_pos, bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
+                ax1.hlines(max(0, y - y_err_pos), bin_centre - (cap_length * bin_width), bin_centre + (cap_length * bin_width), lw=eline_width, color=ecolor)
 
 
     # custom legend entry how?
     ax1.legend(loc=(1.02, 0.58))
 
+    if plot_disagreement_underneath and (plotting_data is not None):
+        ax2.set_xlim(xlims[0], xlims[1])
+        # bin up the total
+        # create interpolation object from total
+        total_interpolator = scipy.interpolate.interp1d(Q, TOTAL)
+        Q_bin_spans = np.array([np.linspace(bottom, top, 100) for bottom, top in zip(bin_lower, bin_upper)])
+        freq_bin_spans = [total_interpolator(Q_bin_span) for Q_bin_span in Q_bin_spans]
+        model_bin_heights = [np.trapz(freq_bin_span, Q_bin_span)/(bin_top - bin_bottom) for freq_bin_span, Q_bin_span, bin_top, bin_bottom in zip(freq_bin_spans, Q_bin_spans, bin_upper, bin_lower)]
+        
+        disparities = (plotting_data[2] - model_bin_heights)
+        normalised_disparities = np.zeros(len(disparities))
+        for i in range(len(disparities)):
+            if disparities[i] < 0:
+                normalised_disparities[i] = disparities[i] / plotting_data[3][i]
+            elif disparities[i] > 0:
+                normalised_disparities[i] = disparities[i] / plotting_data[4][i]
+            else: # disparities[i] == 0
+                normalised_disparities = 0
+
+
+        print(plotting_data[2])
+        print(disparities)
+        print(normalised_disparities)
+        print(plotting_data[3])
+        print(plotting_data[4])
+        print("DUMMY")
+        ax2.scatter(plotting_data[0], normalised_disparities)
+        ax2.axhline(y=0)
 
 
     # plot the fraction of the combinatorial background according to the models.
@@ -140,13 +172,14 @@ def plot_backgrounds_along_m_Kmumu(
         CMB_frac = CMB/TOTAL
         MIS_frac = MIS/TOTAL
         SIG_frac = SIG/TOTAL
-        ax2.fill_between(Q, CMB_frac, alpha=alpha, color='blue', lw=0)
-        ax2.fill_between(Q, CMB_frac, CMB_frac+MIS_frac, alpha=alpha, color='green', lw=0)
-        ax2.fill_between(Q, CMB_frac+MIS_frac, CMB_frac+MIS_frac+SIG_frac, alpha=alpha, color='red', lw=0)
-        ax2.set_ylim(0.000001, 1-0.000001)
-        ax2.set_xlim(xlims[0], xlims[1])
-        ax2.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
-        ax2.set_ylabel(r'Fraction', loc='center')
+        ax3.fill_between(Q, CMB_frac, alpha=alpha, color='blue', lw=0)
+        ax3.fill_between(Q, CMB_frac, CMB_frac+MIS_frac, alpha=alpha, color='green', lw=0)
+        ax3.fill_between(Q, CMB_frac+MIS_frac, CMB_frac+MIS_frac+SIG_frac, alpha=alpha, color='red', lw=0)
+        ax3.set_ylim(0.000001, 1-0.000001)
+        ax3.set_xlim(xlims[0], xlims[1])
+        ax3.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
+        ax3.set_ylabel(r'Fraction', loc='center')
+
 
 
     fig.savefig(f'{folder_name}/{file_name}.pdf')
