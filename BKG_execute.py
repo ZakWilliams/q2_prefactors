@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import PDF_helicities_expanded.make_BK_DK_ffs as ff
 import scipy.interpolate
+from termcolor import colored
 
 from BKG_plotter import plot_backgrounds_along_m_Kmumu
 
@@ -102,6 +103,8 @@ MIS *= 0.6*10E2
 spread = 10
 
 TOT = MIS + CMB + SIG
+TOT_area = np.trapz(TOT, Q)
+
 
 # Generate bin boundaries and midpoints
 bin_boundaries = np.linspace(Q[0], Q[-1], 11)
@@ -121,17 +124,42 @@ binned_errs_top = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binn
 binned_errs_bot = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binned_freq))]
 
 # next:
-# - move away from normalization space. This makes things unhelpful and counterintuitive
-# - make the optionality for 1, 2, or none of the below windows work correctly with all the axes and such
-# - implement unbinned data generator
 # - implement data binner, incuding error estimation
 
 
+# make CDF
+PDF_TOT = TOT / TOT_area
+CDF_TOT = np.zeros(len(Q))
+for i in range(1,len(Q)):
+    CDF_TOT[i] = CDF_TOT[i - 1] + PDF_TOT[i]
+CDF_TOT /= CDF_TOT[-1]
+
+# create linear interpolator
+CDF_inverted = scipy.interpolate.CubicSpline(CDF_TOT, Q)
+
+bin_count = 10
+data_size = int(TOT_area)
+# Generate uniform
+pseudodata = CDF_inverted(np.random.uniform(0.,1.,data_size))
+pseudo_bins = np.histogram(pseudodata, bins=bin_count, range=(Q[0], Q[-1]))
+pseudo_err_top = np.sqrt(pseudo_bins[0])
+pseudo_err_bottom = np.sqrt(pseudo_bins[0])
+
+print(colored(f"Area under total: {TOT_area} Events", "green"))
+print(colored(f"Event numbers called to be generated: {data_size} Events", "green"))
+print(colored(f"Events generated: {len(pseudodata)} Events", "green"))
 
 
-
-
-
+plot_lim = 10000
+plt.plot(Q, PDF_TOT)
+plt.savefig('plot1.pdf')
+plt.close()
+plt.plot(Q, CDF_TOT)
+plt.savefig('plot2.pdf')
+plt.close()
+plt.scatter(np.linspace(0, plot_lim, plot_lim), pseudodata[:plot_lim], s=1)
+plt.savefig('plot3.pdf')
+plt.close()
 
 
 
@@ -139,23 +167,16 @@ binned_errs_bot = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binn
 
 
 folder = 'PDF_helicities_expanded/plots'
-# make so can take binned data or unbinned data
-
-
-
-
-
-
-
-
 
 
 plot_backgrounds_along_m_Kmumu(Q=Q,
                                CMB=CMB,
                                SIG=SIG,
                                MIS=MIS,
-                               binned_data = [bin_boundaries, binned_freq, binned_errs_top, binned_errs_bot],
-                               #unbinned_data = 2,
+                               #binned_data = [pseudo_bins[1], pseudo_bins[0], pseudo_err_top, pseudo_err_bottom],
+                               #[bin_boundaries, binned_freq, binned_errs_top, binned_errs_bot],
+                               unbinned_data = pseudodata,
+                               bin_count=10,
                                folder_name=folder,
                                fill_or_lines='lines',
                                plot_total_line_above_fill=True,
@@ -163,6 +184,6 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                alpha=0.4,
                                xlims=[Q[0], Q[-1]],
                                ylims=[1+0.000001, 1000000],
-                               plot_frac_underneath=True,
                                plot_disagreement_underneath=True,
+                               plot_frac_underneath=True,
                                )
