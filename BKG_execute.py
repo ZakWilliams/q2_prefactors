@@ -65,9 +65,7 @@ def double_crystal_ball(x, alphaL, nL, alphaR, nR, mean, sigma):
     return out
 
 
-
-
-Q = np.linspace(mB-100, mB+600, 1000)
+Q = np.linspace(mB-100, mB+600, 100000)
 Q2 = Q**2
 
 A = 200
@@ -126,7 +124,7 @@ binned_errs_bot = [spread*np.sqrt(binned_freq[i]) + damp for i in range(len(binn
 # next:
 # - implement data binner, incuding error estimation
 
-
+# TOT is the unnormalised PDF defined over the range Q
 # make CDF
 PDF_TOT = TOT / TOT_area
 CDF_TOT = np.zeros(len(Q))
@@ -135,12 +133,12 @@ for i in range(1,len(Q)):
 CDF_TOT /= CDF_TOT[-1]
 
 # create linear interpolator
-CDF_inverted = scipy.interpolate.CubicSpline(CDF_TOT, Q)
+#CDF_inverted = np.interp(CDF_TOT, Q)
 
 bin_count = 10
 data_size = int(TOT_area)
 # Generate uniform
-pseudodata = CDF_inverted(np.random.uniform(0.,1.,data_size))
+pseudodata = np.interp(np.random.uniform(0.,1.,data_size), CDF_TOT, Q)#CDF_inverted(np.random.uniform(0.,1.,data_size))
 pseudo_bins = np.histogram(pseudodata, bins=bin_count, range=(Q[0], Q[-1]))
 pseudo_err_top = np.sqrt(pseudo_bins[0])
 pseudo_err_bottom = np.sqrt(pseudo_bins[0])
@@ -176,14 +174,14 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                #binned_data = [pseudo_bins[1], pseudo_bins[0], pseudo_err_top, pseudo_err_bottom],
                                #[bin_boundaries, binned_freq, binned_errs_top, binned_errs_bot],
                                unbinned_data = pseudodata,
-                               bin_count=10,
+                               bin_count=100,
                                folder_name=folder,
                                fill_or_lines='lines',
                                plot_total_line_above_fill=True,
                                logarithmic=True,
                                alpha=0.4,
                                xlims=[Q[0], Q[-1]],
-                               ylims=[1+0.000001, 1000000],
+                               ylims=[100+0.000001, 1000000],
                                plot_disagreement_underneath=True,
                                plot_frac_underneath=True,
                                )

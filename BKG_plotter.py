@@ -89,7 +89,6 @@ def plot_backgrounds_along_m_Kmumu(
         axes_disp_coords = []
         axes_frac_coords = secondary_plot_coords
 
-    #fig, (axes_main, axes_frac) = plt.subplots(nrows=2, sharex=True)
     fig = plt.figure(figsize=(18, 14.4))
     axes_main = fig.add_axes(primary_plot_coords)
     if plot_disagreement_underneath:
@@ -125,9 +124,8 @@ def plot_backgrounds_along_m_Kmumu(
             axes_main.axvline(edge, zorder=0, lw = 0.3, color='blue')
     if show_mB:
         axes_main.axvline(mB, zorder=0, lw = 1, color='red')
-    if not plot_frac_underneath: axes_main.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
-    if plot_frac_underneath: axes_main.set_xticklabels([])
-    axes_main.set_ylabel(r'Events', loc='center')
+    axes_main.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
+    axes_main.set_ylabel(r'$\frac{dN}{dE}$ [MeV$^{-1}$]', loc='center')
     if logarithmic: axes_main.set_yscale("log")
     axes_main.set_xlim(xlims[0], xlims[1])
     axes_main.set_ylim(ylims[0], ylims[1])
@@ -138,26 +136,29 @@ def plot_backgrounds_along_m_Kmumu(
         bin_upper = binned_data[0][1:]
 
         Q_bin_centres = (bin_lower + bin_upper) / 2
-        Q_bin_widths = (bin_upper - bin_lower) / 2
+        Q_bin_halfwidths = (bin_upper - bin_lower) / 2
 
-        plotting_data = [Q_bin_centres, Q_bin_widths, binned_data[1], binned_data[2], binned_data[3]]
+        plotting_data = [Q_bin_centres, Q_bin_halfwidths, binned_data[1], binned_data[2], binned_data[3]]
     elif unbinned_data_provided:
         if bin_count is bin_count_sentinel:
             raise Exception(colored("You are loading unbinned data into plot_backgrounds_along_m_Kmumu. Please specify a number for bin_count.", "red"))
         
         pseudo_bins = np.histogram(unbinned_data, bins=bin_count, range=(Q[0], Q[-1]))
-        pseudo_err_top = np.sqrt(pseudo_bins[0])
-        pseudo_err_bottom = np.sqrt(pseudo_bins[0])
 
         bin_lower = pseudo_bins[1][:-1]
         bin_upper = pseudo_bins[1][1:]
         Q_bin_centres = (bin_lower + bin_upper) / 2
-        Q_bin_widths = (bin_upper - bin_lower) / 2
+        Q_bin_halfwidths = (bin_upper - bin_lower) / 2
+
+        uncertainty_shrink_factor = 7
+
+        pseudo_err_top = np.sqrt(pseudo_bins[0])/uncertainty_shrink_factor
+        pseudo_err_bottom = np.sqrt(pseudo_bins[0])/uncertainty_shrink_factor
 
         event_count = sum(pseudo_bins[0])
         print(colored(f"Area underneath binned histogram: {event_count}", "green"))
 
-        plotting_data = [Q_bin_centres, Q_bin_widths, pseudo_bins[0]/(2*Q_bin_widths), pseudo_err_top, pseudo_err_bottom]
+        plotting_data = [Q_bin_centres, Q_bin_halfwidths, pseudo_bins[0]/(2*Q_bin_halfwidths), pseudo_err_top, pseudo_err_bottom]
 
 
 
@@ -204,9 +205,16 @@ def plot_backgrounds_along_m_Kmumu(
                 normalised_disparities = 0
 
 
-        axes_disp.scatter(plotting_data[0], normalised_disparities)
-        axes_disp.axhline(y=0)
-
+        axes_disp.scatter(plotting_data[0], normalised_disparities, s=16, marker='d', c='black', zorder=2)
+        axes_disp.axhline(y=0, zorder=0, color='gray', lw=1)#, linestyle='dashed')
+        axes_disp.fill_between(Q, -1.0, 1.0, color='black', alpha=0.2, lw=0)
+        axes_disp.set_yticks([-2.0, 0.0, 2.0])
+        axes_disp.set_ylim(-2.9999, 2.9999)
+        axes_disp.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
+        axes_disp.set_ylabel(r'Pulls', loc='center')
+        # testing number in 1 sigma
+        test_frac = sum(1 for _ in normalised_disparities if np.abs(_) < 1 )
+        print(colored(f"{test_frac/len(normalised_disparities)}","cyan"))
 
 
 
@@ -223,6 +231,18 @@ def plot_backgrounds_along_m_Kmumu(
         axes_frac.set_xlim(xlims[0], xlims[1])
         axes_frac.set_xlabel(r'$m_{K\mu\mu}$ [MeV]', loc='center')
         axes_frac.set_ylabel(r'Fraction', loc='center')
+
+
+    # handle xticklabels based on which should or shouldn't appear
+    if plot_frac_underneath or plot_disagreement_underneath:
+        axes_main.set_xticklabels([])
+        axes_main.set_xlabel('')
+
+    if plot_frac_underneath and plot_disagreement_underneath:
+        axes_disp.set_xticklabels([])
+        axes_disp.set_xlabel('')
+    
+
 
 
 
