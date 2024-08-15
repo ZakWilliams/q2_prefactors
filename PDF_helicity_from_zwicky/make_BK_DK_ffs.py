@@ -11,7 +11,7 @@ import gvar as gv
 
 ############################################# Read numbers and correlations from text file ###########################
 
-f = open('PDF_helicity_from_zwicky/BtoKandDtoKformfacs.txt','r')
+f = open('BtoKandDtoKformfacs.txt','r') # need to put high level file back in for other runs
 lines = f.readlines()
 toggle = False
 for line in lines:
@@ -82,7 +82,7 @@ def make_z_B(qsq):
     if qsq < 0:
         print('WARNING! Using a -ve q^2 value')
     if qsq > qsq_max_B.mean:
-        print('WARNING! Using a q^2 value which exceeds the physical maximum of {0}'.format(qsq_max_B))
+        pass#print('WARNING! Using a q^2 value which exceeds the physical maximum of {0}'.format(qsq_max_B))
     t_plus = (MB+MK)**2
     t_0 = 0
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
@@ -94,7 +94,7 @@ def make_z_D(qsq):
     if qsq < 0:
         print('WARNING! Using a -ve q^2 value')
     if qsq > qsq_max_D.mean:
-        print('WARNING! Using a q^2 value which exceeds the physical maximum of {0}'.format(qsq_max_D))
+        pass#print('WARNING! Using a q^2 value which exceeds the physical maximum of {0}'.format(qsq_max_D))
     t_plus = (MD+MK)**2
     t_0 = 0
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))

@@ -180,8 +180,8 @@ def plot_backgrounds_along_m_Kmumu(
 
 
     # Basic legend call. Replace with custom legend later
-    axes_main.legend(loc=(1.02, 0.58))
-
+    #axes_main.legend(loc=(1.02, 0.58))
+    axes_main.legend(loc=(0.39, 0.58))
 
 
 

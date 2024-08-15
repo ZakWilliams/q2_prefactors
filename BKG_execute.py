@@ -68,7 +68,7 @@ def double_crystal_ball(x, alphaL, nL, alphaR, nR, mean, sigma):
 Q = np.linspace(mB-100, mB+600, 100000)
 Q2 = Q**2
 
-A = 200
+A = 500
 B = 1000
 C = -Q[0]
 # create exponental
@@ -172,9 +172,8 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                SIG=SIG,
                                MIS=MIS,
                                #binned_data = [pseudo_bins[1], pseudo_bins[0], pseudo_err_top, pseudo_err_bottom],
-                               #[bin_boundaries, binned_freq, binned_errs_top, binned_errs_bot],
-                               unbinned_data = pseudodata,
-                               bin_count=100,
+                               #unbinned_data = pseudodata,
+                               #bin_count=100,
                                folder_name=folder,
                                fill_or_lines='lines',
                                plot_total_line_above_fill=True,
@@ -182,6 +181,6 @@ plot_backgrounds_along_m_Kmumu(Q=Q,
                                alpha=0.4,
                                xlims=[Q[0], Q[-1]],
                                ylims=[100+0.000001, 1000000],
-                               plot_disagreement_underneath=True,
+                               #plot_disagreement_underneath=True,
                                plot_frac_underneath=True,
                                )

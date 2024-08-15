@@ -167,4 +167,4 @@ def G2(q2, C_7, C_S, C_P, C_V, C_A, C_T, C_T5):
 #def dGamma_dq2dctl():
 
 def dGamma_dq(q2, ctl, C_7, C_S, C_P, C_V, C_A, C_T, C_T5):
-    return common_prefactor(q2) * G0(q2, C_7, C_S, C_P, C_V, C_A, C_T, C_T5) * 2 * np.sqrt(q2) # WHERE IS THIS 2root(q2) from? It's in alex's code but idk where it comes from in zwicky
+    return common_prefactor(q2) * G0(q2, C_7, C_S, C_P, C_V, C_A, C_T, C_T5) * 2 * np.sqrt(q2) 

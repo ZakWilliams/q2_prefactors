@@ -377,12 +377,13 @@ plt.plot(q, C9_over_C10_ratio, label=r'$R_{q^2}(9,10)$', lw=2, color='red') # re
 plt.plot(q, CT5_over_CT_ratio, label=r'$R_{q^2}(T5,T)$', lw=2, color='green') # green
 plt.ylim(0, 2)
 plt.xlim(0, 5000)
-plt.axvspan(q[0], 990, zorder=0, color='gray', alpha=0.4, lw=0., label=r'First and Last bins in $B_s^0\to\phi\mu\mu.^4$')
+plt.axvspan(q[0], 990, zorder=0, color='gray', alpha=0.4, lw=0., label=r'First and Last bins in $B_s^0\to\phi\mu\mu [4].$')
 plt.axvspan(4580, q[-1], zorder=0, color='gray', alpha=0.4, lw=0.)
+plt.axhline(1, zorder=0, color='black', linestyle='dashed', lw=1.5, label='Exact Local Degeneracy Present')
 plt.xlabel(r'$m_{\mu\mu}$ [MeV]', loc='center')
 plt.ylabel(r'$\Delta J = 0$ Prefactor Ratios', loc='center')
-plt.legend(loc = (0.22, 0.68))
-plt.savefig(f'PDF_helicities_expanded/plots/DeltaJ_eq_0_q2_ratios.pdf')
+plt.legend(loc = (0.22, 0.62))
+plt.savefig(f'PDF_helicities_expanded/plots/all_ratios.pdf')
 plt.close()
 
 '''
